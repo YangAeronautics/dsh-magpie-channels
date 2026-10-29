@@ -8,6 +8,8 @@
   "exports": {
     ".": "./index.js",
     "./client": "./client/bundle.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
     "./host/ledger": "./host/ledger.js",
     "./host/catalog": "./host/catalog.js",
     "./host/report": "./host/report.js",
@@ -22,6 +24,8 @@
     "host/report.js",
     "host/tool-value.js",
     "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
     "README.md",
     "LICENSE"
   ],
@@ -46,12 +50,21 @@
     }
   },
   "scripts": {
-    "test": "node client/build.js && node --experimental-test-isolation=none --test test/ledger.test.js test/catalog.test.js test/tool.test.js test/host.test.js test/client.test.js",
+    "test": "node client/build.js && node --experimental-test-isolation=none --test test/ledger.test.js test/catalog.test.js test/tool.test.js test/host.test.js test/client.test.js test/manifest.test.js",
     "build": "node client/build.js"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YangAeronautics/dsh-magpie-channels.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YangAeronautics/dsh-magpie-channels/issues"
+  },
+  "sideEffects": false,
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-tools": "^0.2.1-rc.3"
+    "@deepseek-ai/dsh-tools": "^0.2.1-rc.3",
+    "@deepseek-ai/schemastery": "^3.18.4"
   }
 }

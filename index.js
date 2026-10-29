@@ -11,10 +11,9 @@
  *   apply time; the scoped callback runs once both are available.
  * - `ctx.webServer.register({ kind: 'exact', path, handler })` — same shape as
  *   the locally installed `dsh-our-free-model` bundle.
- * - `defineTool(...)` from `@deepseek-ai/dsh-tools` — the documented tool
- *   declaration (`parameters` is the flat schema DSL, `execute` returns the
- *   declared output value). That package is a peer served by the Harness
- *   process, so it is required lazily in `loadDefineTool`.
+ * - `Config` (Schemastery) — the documented Config contract: the Loader
+ *   validates and defaults the row's `config` before `apply` runs, so `apply`
+ *   receives a complete config instead of reading `ctx.fiber` itself.
  */
 
 import { createRequire } from 'node:module'
@@ -32,15 +31,48 @@ export const ROUTE_PATH = '/api/magpie-channels/report'
 /** Services needed before anything can be contributed. */
 export const inject = ['webServer', 'tools']
 
+/** Load Schemastery from the Harness process (served, not bundled by this package). */
+function loadSchema() {
+  const mod = createRequire(import.meta.url)('@deepseek-ai/schemastery')
+  return mod.default ?? mod
+}
+
 /**
- * Read this bundle row's config.
- * @param ctx - the plugin context.
+ * Config schema for this bundle row.
+ *
+ * Declared through Schemastery so Plugin Manager and Settings can render the
+ * fields and a malformed `config` fails activation instead of silently falling
+ * back. `ledgerDir` defaults to the empty string, meaning "resolve from
+ * `$MAGPIE_HOME` or `~/.config/magpie`": that resolution needs the host
+ * environment, so it stays in `defaultLedgerDir()` at apply time.
+ *
+ * @type {unknown}
  */
-export function readConfig(ctx) {
-  const config = ctx.fiber?.entry?.options?.config ?? {}
+export const Config = (() => {
+  const z = loadSchema()
+  return z.object({
+    gatewayUrl: z.string()
+      .default('http://127.0.0.1:3425')
+      .description('Magpie 网关地址，例如 http://127.0.0.1:3425'),
+    ledgerDir: z.string()
+      .default('')
+      .description('Magpie 账本目录；留空则用 $MAGPIE_HOME 或 ~/.config/magpie'),
+  })
+})()
+
+/**
+ * Resolve the runtime options from the validated row config.
+ *
+ * `apply` passes the Loader-validated `config`, but tests and any direct caller
+ * may pass nothing, so this still applies the documented defaults.
+ *
+ * @param config - the row config, already defaulted by the Loader.
+ */
+export function resolveConfig(config) {
+  const source = config ?? {}
   return {
-    gatewayUrl: typeof config.gatewayUrl === 'string' && config.gatewayUrl !== '' ? config.gatewayUrl : 'http://127.0.0.1:3425',
-    ledgerDir: typeof config.ledgerDir === 'string' && config.ledgerDir !== '' ? config.ledgerDir : defaultLedgerDir(),
+    gatewayUrl: typeof source.gatewayUrl === 'string' && source.gatewayUrl !== '' ? source.gatewayUrl : 'http://127.0.0.1:3425',
+    ledgerDir: typeof source.ledgerDir === 'string' && source.ledgerDir !== '' ? source.ledgerDir : defaultLedgerDir(),
   }
 }
 
@@ -139,11 +171,12 @@ export function renderChannels(value) {
 /**
  * Contribute the report route and the model-facing tool.
  * @param ctx - the plugin context.
+ * @param config - this row's config, validated and defaulted by `Config`.
  */
-export function apply(ctx) {
-  const config = readConfig(ctx)
-  const catalog = new CatalogCache({ baseUrl: config.gatewayUrl })
-  const ledgerDir = config.ledgerDir
+export function apply(ctx, config) {
+  const options = resolveConfig(config)
+  const catalog = new CatalogCache({ baseUrl: options.gatewayUrl })
+  const ledgerDir = options.ledgerDir
 
   ctx.inject(['webServer', 'tools'], (scoped) => {
     scoped.effect(() => scoped.webServer.register({

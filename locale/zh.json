@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Magpie 渠道",
+    "description": "列出本机 Magpie 网关各渠道可用的 LLM 模型，以及剩余额度与重置时间，用来挑选这一刻该走哪个渠道。"
+  }
+}

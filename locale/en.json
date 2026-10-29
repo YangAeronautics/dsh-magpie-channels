@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Magpie Channels",
+    "description": "Shows the LLM models each local Magpie gateway channel serves, with remaining quota and reset times."
+  }
+}
