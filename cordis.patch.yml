@@ -1,0 +1,11 @@
+# dsh-magpie-channels bundle patch.
+#
+# The single inserted row mounts the Host half; the Browser half is declared by
+# package.json `dsh.client` and binds to the row whose `name` is the bare
+# package name (subpath rows do not carry it).
+- insert:
+    - id: magpie-channels
+      name: 'dsh-magpie-channels'
+      config:
+        gatewayUrl: http://127.0.0.1:3425
+        ledgerDir: ''

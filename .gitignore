@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.tmp/
+quotas.json
+credits-daily.json
+balance-history.json
+quota-history.json

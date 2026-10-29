@@ -1,0 +1,57 @@
+{
+  "name": "dsh-magpie-channels",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Magpie 渠道面板：在 DSH 侧栏列出本机 Magpie 网关每个渠道可用的 LLM 模型及其余额/额度（只读）。",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client/bundle.js",
+    "./host/ledger": "./host/ledger.js",
+    "./host/catalog": "./host/catalog.js",
+    "./host/report": "./host/report.js",
+    "./host/tool-value": "./host/tool-value.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client/bundle.js",
+    "host/ledger.js",
+    "host/catalog.js",
+    "host/report.js",
+    "host/tool-value.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "magpie",
+    "llm",
+    "quota"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  },
+  "scripts": {
+    "test": "node client/build.js && node --experimental-test-isolation=none --test test/ledger.test.js test/catalog.test.js test/tool.test.js test/host.test.js test/client.test.js",
+    "build": "node client/build.js"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-tools": "^0.2.1-rc.3"
+  }
+}
